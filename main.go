@@ -2,30 +2,50 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/moth13/mailer/mailer"
 	"github.com/moth13/mailer/util"
 )
+
+var mailerInstance *mailer.Mailer
 
 func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		fmt.Println("Error loading config:", err)
-		return
+		panic(err)
 	}
 
-	mailerInstance := mailer.NewMailer(config)
-
-	mail := mailer.Email{
-		To:      "jeremie.guerinel@gmail.com",
-		Subject: "Test mail",
-		Body:    "Email body",
+	mailerInstance = mailer.NewMailer(config)
+	if mailerInstance == nil {
+		fmt.Println("Error creating mailer instance")
+		panic("Mailer instance is nil")
 	}
 
-	err = mailerInstance.SendEmail(mail)
+	router := gin.Default()
+
+	router.POST("api/mailer/send", postMail)
+
+	err = router.Run("0.0.0.0:8080")
 	if err != nil {
-		fmt.Println("Error sending email:", err)
+		fmt.Println("Error starting server:", err)
+		panic(err)
+	}
+}
+
+func postMail(c *gin.Context) {
+	var email mailer.Email
+	if err := c.ShouldBindJSON(&email); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
-	fmt.Println("Email sent successfully!")
+
+	err := mailerInstance.SendEmail(email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Email sent successfully"})
 }

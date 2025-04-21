@@ -12,9 +12,9 @@ type Mailer struct {
 }
 
 type Email struct {
-	To      string
-	Subject string
-	Body    string
+	To      string `json:"to" form:"to" binding:"required"`
+	Subject string `json:"subject" form:"subject" binding:"required"`
+	Body    string `json:"body" form:"body" binding:"required"`
 }
 
 func NewMailer(config util.Config) *Mailer {
