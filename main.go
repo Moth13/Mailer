@@ -3,13 +3,17 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/moth13/mailer/mailer"
 	"github.com/moth13/mailer/util"
+	"github.com/moth13/mailer/worker"
 )
 
 var mailerInstance *mailer.Mailer
+var workerPool worker.WorkerPool
+var maxWorkers = 5
 
 func main() {
 	config, err := util.LoadConfig(".")
@@ -24,6 +28,15 @@ func main() {
 		panic("Mailer instance is nil")
 	}
 
+	wg := &sync.WaitGroup{}
+	workerPool = worker.NewWorkerPool(maxWorkers, wg)
+	if workerPool == nil {
+		fmt.Println("Error creating worker pool")
+		panic("Worker pool is nil")
+	}
+
+	workerPool.Run()
+
 	router := gin.Default()
 
 	router.POST("api/mailer/send", postMail)
@@ -33,6 +46,7 @@ func main() {
 		fmt.Println("Error starting server:", err)
 		panic(err)
 	}
+	workerPool.Stop()
 }
 
 func postMail(c *gin.Context) {
@@ -42,10 +56,11 @@ func postMail(c *gin.Context) {
 		return
 	}
 
-	err := mailerInstance.SendEmail(email)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send email"})
-		return
-	}
+	workerPool.AddTask(func() {
+		if err := mailerInstance.SendEmail(email); err != nil {
+			fmt.Println("Error sending email:", err)
+		}
+	})
+
 	c.JSON(http.StatusOK, gin.H{"message": "Email sent successfully"})
 }
