@@ -3,6 +3,7 @@ module github.com/moth13/mailer
 go 1.24.0
 
 require (
+	github.com/a-h/templ v0.3.857
 	github.com/gin-gonic/gin v1.10.0
 	github.com/spf13/viper v1.20.1
 )
@@ -40,8 +41,8 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
 	google.golang.org/protobuf v1.36.1 // indirect

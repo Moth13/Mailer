@@ -1,0 +1,19 @@
+package views
+
+templ Mails() {
+    <form>
+        <div id="sendMailForm">
+            <div>
+                <label>To:</label>
+                <input type="text" id="to" name="to" class="form-control">
+                <label>Subject:</label>
+                <input type="text" id="subject" name="subject" class="form-control">
+                <label>Message:</label>
+                <input type="text" id="body" name="body" class="form-control">
+            </div>
+            <div>
+                <button class="btn btn-primary" type="send" hx-post="/mails" hx-target="#content">Send Mail</button>
+            </div>
+        </div>
+    </form>
+}

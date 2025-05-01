@@ -1,19 +1,72 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 
+	"github.com/a-h/templ"
 	"github.com/gin-gonic/gin"
 	"github.com/moth13/mailer/mailer"
 	"github.com/moth13/mailer/util"
+	"github.com/moth13/mailer/views"
 	"github.com/moth13/mailer/worker"
 )
 
 var mailerInstance *mailer.Mailer
 var workerPool worker.WorkerPool
 var maxWorkers = 5
+
+func render(ctx *gin.Context, status int, template templ.Component) error {
+	ctx.Status(status)
+	return template.Render(ctx.Request.Context(), ctx.Writer)
+}
+
+func indexPageHandler(c *gin.Context) {
+	_, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	err := render(c, http.StatusOK, views.Index())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	}
+}
+
+func mailsPageHandler(c *gin.Context) {
+	_, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	err := render(c, http.StatusOK, views.Mails())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	}
+}
+
+func postMailsPageHandler(c *gin.Context) {
+	var email mailer.Email
+	if err := c.ShouldBind(&email); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	workerPool.AddTask(func() error { return mailerInstance.SendEmail(email) })
+
+	_, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	err := render(c, http.StatusOK, views.Mails())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+	}
+}
 
 func main() {
 	config, err := util.LoadConfig(".")
@@ -39,6 +92,10 @@ func main() {
 
 	router := gin.Default()
 
+	router.GET("/", indexPageHandler)
+	router.GET("/mails", mailsPageHandler)
+	router.POST("/mails", postMailsPageHandler)
+
 	router.POST("api/mailer/send", postMail)
 
 	err = router.Run("0.0.0.0:8080")
@@ -56,11 +113,7 @@ func postMail(c *gin.Context) {
 		return
 	}
 
-	workerPool.AddTask(func() {
-		if err := mailerInstance.SendEmail(email); err != nil {
-			fmt.Println("Error sending email:", err)
-		}
-	})
+	workerPool.AddTask(func() error { return mailerInstance.SendEmail(email) })
 
 	c.JSON(http.StatusOK, gin.H{"message": "Email sent successfully"})
 }

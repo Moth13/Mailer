@@ -1,0 +1,23 @@
+package views
+
+import "github.com/moth13/mailer/views/components"
+
+templ Index() {
+	<!DOCTYPE html>
+	<html lang="en">
+		@components.Header()
+		<head>
+			<nav class="w-64 bg-gray-800 text-white h-screen p-4">
+				<ul>
+					<li class="mb-4"><a href="#mails" hx-get="/mails" hx-target="#content" class="hover:text-grat-400">Mails</a></li>
+					<li class="mb-4"><a href="#about" hx-get="/about" hx-target="#content" class="hover:text-grat-400">About</a></li>
+				</ul>
+			</nav>
+		</head>
+		<body class="flex">
+			<div id="content" hx-get="/mails" hx-target="#content" hx-trigger="load" class="flex-1 p-4">
+			</div>
+		</body>
+		@components.Footer()
+	</html>
+}
