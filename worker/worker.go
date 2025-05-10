@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -41,11 +40,9 @@ func (wp *workerPool) AddTask(task func() error) {
 func (wp *workerPool) Work(workerID int) {
 	defer wp.wg.Done()
 	for task := range wp.tasks {
-		fmt.Printf("Worker %d started job\n", workerID)
 		if err := task(); err != nil {
 			wp.AddTask(task)
 		}
-		fmt.Printf("Worker %d started job\n", workerID)
 	}
 }
 

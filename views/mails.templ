@@ -5,14 +5,42 @@ templ Mails() {
         <div id="sendMailForm">
             <div>
                 <label>To:</label>
-                <input type="text" id="to" name="to" class="form-control">
+                <input
+                    type="text"
+                    id="to"
+                    name="to"
+                    required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="destinataire@email.com">
                 <label>Subject:</label>
-                <input type="text" id="subject" name="subject" class="form-control">
+                <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="Votre sujet ici...">
                 <label>Message:</label>
-                <input type="text" id="body" name="body" class="form-control">
+                <textarea
+                    id="body"
+                    name="body"
+                    rows="5"
+                    required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="Votre message ici..."></textarea>
+                <label>Scheduled at (optional):</label>
+                <input
+                    type="datetime-local"
+                    id="scheduled_at"
+                    name="scheduled_at"
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             </div>
             <div>
-                <button class="btn btn-primary" type="send" hx-post="/mails" hx-target="#content">Send Mail</button>
+                <button
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="send"
+                hx-post="/mails"
+                hx-target="#content">Send Mail</button>
             </div>
         </div>
     </form>

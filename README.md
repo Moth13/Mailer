@@ -32,6 +32,17 @@ go build -o moth-mailer .
 ./moth-mailer
 ```
 
+or
+
+```
+make server
+```
+
+### Test the project
+```
+make test
+```
+
 ## 🎮 Usage
 
 ### API Endpoints
@@ -43,6 +54,7 @@ curl -X POST http://localhost:8080/api/mail/send \
     "to": "dest@example.com",
     "subject": "Hello GoMailer!",
     "body": "This is a test 🌟"
+    "scheduled_at": "2025-05-10T15:15"
   }'
 ```
 
